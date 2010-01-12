@@ -1,10 +1,19 @@
-#!/bin/sh
+#!/bin/bash
+# How to use this file:
+# First, fetch it, like:
+#     $ wget http://bitbucket.org/ianb/geodns/raw/tip/setup-layout.sh
+#     $ chmod +x setup-layout.sh
+#     $ ./setup-layout.sh geodns-app
 
-if [ -z "$1" || "$1" = "-h" ] ; then
+
+if [ -z "$1" ] || [ "$1" = "-h" ] ; then
     echo "Usage: $(basename $0) DIR"
     echo "Creates a layout for the GeoDNS application in the given directory"
     echo "toppcloud must be installed before running this"
+    exit 2
 fi
+
+DIR="$1"
 
 if ! which toppcloud ; then
     echo "toppcloud is not installed"
