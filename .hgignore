@@ -1,0 +1,4 @@
+syntax: glob
+
+geodns.egg-info
+
