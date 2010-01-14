@@ -1,7 +1,7 @@
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
 from sqlalchemy import Unicode, DateTime, Column, MetaData, Integer
-from geoalchemy import GeometryColumn, Point, LineString, Polygon
+from geoalchemy import GeometryColumn, Point, LineString, MultiPolygon
 from geoalchemy import GeometryDDL
 from geodns.config import engine
 
@@ -15,6 +15,6 @@ class Jurisdiction(Base):
     uri = Column(Unicode)
     type_uri = Column(Unicode)
     updated = Column(DateTime, default=datetime.now)
-    geom = GeometryColumn(Polygon(2))
+    geom = GeometryColumn(MultiPolygon(2))
 
 GeometryDDL(Jurisdiction.__table__)
