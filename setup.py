@@ -17,6 +17,11 @@ setup(name='geodns',
       zip_safe=False,
       install_requires=[
           'WebOb',
-          'GeoAlchemy'
+          'GeoAlchemy',
+          'CmdUtils',
       ],
+      entry_points="""
+      [console_scripts]
+      geodns-import-shp = geodns.importshp:main
+      """,
       )
