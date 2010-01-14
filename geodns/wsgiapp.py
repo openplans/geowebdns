@@ -4,7 +4,7 @@ from webob import Response
 from simplejson import dumps
 from decimal import Decimal
 from geodns.model import Jurisdiction, metadata
-from geodns.config import session
+from geodns.config import session, engine
 from geoalchemy import WKTSpatialElement
 
 class Application(object):
@@ -23,7 +23,6 @@ class Application(object):
     @wsgify
     def update_fetch(self, req):
         assert req.environ.get('toppcloud.internal')
-        metadata.drop_all()
         metadata.create_all()
         return Response(
             'ok', content_type='text/plain')
@@ -40,10 +39,15 @@ class Application(object):
             content_type='application/json')
     
     def query(self, coords, type):
-        point = "POINT(%s %s)" % (coords[0], coords[1])
+        from sqlalchemy.sql import expression
+        from sqlalchemy.sql import select
+        ## FIXME: this is a long-winded way of doing the select:
+        point = "POINT(%s %s)" % (coords[1], coords[0])
         point = WKTSpatialElement(point)
-        s = session.query(Jurisdiction).filter(
-            Jurisdiction.geom.intersects(point))
+        s = select([Jurisdiction.__table__], expression.func.ST_Intersects(
+            Jurisdiction.geom, point))
+        conn = engine.connect()
+        s = conn.execute(s, point=point, srid=4326)
         results = []
         for row in s:
             results.append(dict(
