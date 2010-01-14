@@ -59,6 +59,10 @@ parser.add_argument(
     '--row-by-row', action='store_true',
     help="Commit each row one-by-one")
 
+parser.add_argument(
+    '--reset-database', action='store_true',
+    help="Drop and re-add all database tables")
+
 def catch_error(func):
     def decorated(*args, **kw):
         try:
@@ -77,6 +81,8 @@ def temp_dir(name):
 def main():
     args = parser.parse_args()
     logger =  create_logger(args)
+    if args.reset_database:
+        return reset_database(logger)
     file_set = get_file_set(logger, args.file)
     file_set = file_set.convert_to_standard_projection(logger)
     json = file_set.create_json(logger)
@@ -139,6 +145,13 @@ def main():
         return
     insert_rows(logger, rows, commit=args.commit,
                 one_by_one=args.row_by_row)
+
+def reset_database(logger):
+    from geodns.model import metadata
+    logger.notify('Dropping all tables')
+    metadata.drop_all()
+    logger.notify('Recreating all tables')
+    metadata.create_all()
 
 def insert_rows(logger, rows, commit, one_by_one):
     #import logging
@@ -275,7 +288,7 @@ class FileSet(object):
 
     def convert_to_standard_projection(self, logger):
         new_file_set = self.new()
-        cmd = ['ogr2ogr', '-a_srs', 'EPSG:4326', '-f', 'ESRI Shapefile',
+        cmd = ['ogr2ogr', '-t_srs', 'EPSG:4326', '-f', 'ESRI Shapefile',
                new_file_set.shp, self.shp]
         logger.info('Running %s' % ' '.join(cmd))
         proc = subprocess.Popen(cmd)
