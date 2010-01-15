@@ -255,7 +255,7 @@ def get_file_set(logger, filename):
             'Cannot figure out what kind of file %s is' % filename)
 
 def unpack_zip(filename):
-    zip = zipfile.open(filename, 'rb')
+    zip = zipfile.ZipFile(filename, 'r')
     tmp = temp_dir('geodns-importshp')
     zip.extractall(tmp)
     return tmp
