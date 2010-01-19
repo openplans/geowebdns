@@ -9,6 +9,19 @@ We'll look at the SQLAlchemy output, but not with the default format::
     >>> logger.addHandler(ch)
     >>> logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
+First, import some data::
+
+    >>> from geodns import importshp
+    >>> import os
+    >>> os.environ['SUPPRESS_LOGGING'] = '1'
+    >>> importshp.main.func(
+    ...     [os.path.join(os.path.dirname(importshp.__file__), 'tests/nycd_09b_av/'),
+    ...     '--reset-database', '--commit',
+    ...     '--row-pyfile=geodns.importhooks:import_community_board'])
+    Dropping all tables
+    ...
+    INFO - COMMIT
+
 First, some setup::
 
     >>> from geodns.wsgiapp import Application
@@ -45,7 +58,7 @@ Query one kind of type::
     INFO - {'GeomFromText_2': 4326, 'GeomFromText_1': 'POINT(-73.9436111 40.7941667)'}
     Response: 200 OK
     Content-Type: application/json
-    {"results": [{"type": "http://open311.org/community-board", "uri": "http://open311.org/community-board", "name": "Board #111"}]}
+    {"results": [{"type": "http://open311.org/community-board", "uri": "http://open311.org/community-board/manhattan/11", "name": "Manhattan Community Board #11"}]}
 
 .. set the interpreter and other emacs stuff:
 

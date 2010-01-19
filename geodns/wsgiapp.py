@@ -76,7 +76,7 @@ class Application(object):
             results.append(dict(
                 type=row.type_uri,
                 name=row.name,
-                uri=type))
+                uri=row.uri))
         return {'results': results}
     
         

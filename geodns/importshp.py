@@ -6,7 +6,11 @@ import tempfile
 import subprocess
 import simplejson
 from glob import glob
+import re
 import tempita
+import shutil
+import atexit
+import posixpath
 from cmdutils.arg import add_verbose, create_logger
 from cmdutils import CommandError
 
@@ -36,8 +40,9 @@ parser.add_argument(
     help="Python code that contains a convert(row) function (literal string)")
 
 parser.add_argument(
-    '--row-pyfile', metavar='FILE.py',
-    help="File with Python code that contains a convert(row) function (literal string)")
+    '--row-pyfile', metavar='FILE.py:FUNC',
+    help="File with Python code that contains a convert(row) function (literal string).  "
+    "Use :FUNC to specify a different function name.  You can also give a module name here.")
 
 parser.add_argument(
     '--row-name', metavar='TEMPLATE',
@@ -63,26 +68,33 @@ parser.add_argument(
     '--reset-database', action='store_true',
     help="Drop and re-add all database tables")
 
-def catch_error(func):
-    def decorated(*args, **kw):
+class catch_error(object):
+    def __init__(self, func):
+        self.func = func
+    def __call__(self, *args, **kw):
         try:
-            return func(*args, **kw)
+            return self.func(*args, **kw)
         except CommandError, e:
             print e
             sys.exit(2)
-    return decorated
 
 def temp_dir(name):
     p = os.path.join('/tmp/%s-%s' % (name, os.getpid()))
+    if os.path.exists(p):
+        shutil.rmtree(p)
     os.mkdir(p)
+    def remove():
+        if os.path.exists(p):
+            shutil.rmtree(p)
+    atexit.register(remove)
     return p
 
 @catch_error
-def main():
-    args = parser.parse_args()
+def main(args=None):
+    args = parser.parse_args(args)
     logger =  create_logger(args)
     if args.reset_database:
-        return reset_database(logger)
+        reset_database(logger)
     file_set = get_file_set(logger, args.file)
     file_set = file_set.convert_to_standard_projection(logger)
     json = file_set.create_json(logger)
@@ -99,12 +111,22 @@ def main():
             raise CommandError("--row-python code does not contain:\n  def convert(row):")
         convert = ns['convert']
     elif args.row_pyfile:
-        ns = {'__file__': args.row_pyfile}
-        execfile(args.row_pyfile, ns)
-        if 'convert' not in ns:
-            raise CommandError("--row-python-file=%s does not contain:\n  def convert(row):"
-                               % args.row_pyfile)
-        convert = ns['convert']
+        if ':' in args.row_pyfile:
+            fn, name = args.row_pyfile.split(':', 1)
+        else:
+            fn = args.row_pyfile
+            name = 'convert'
+        if re.search(r'^[a-zA-Z][a-zA-Z0-9\.]*[a-zA-Z0-9]$', fn):
+            # Appears to be a module
+            __import__(fn)
+            ns = sys.modules[fn].__dict__
+        else:
+            ns = {'__file__': fn}
+            execfile(fn, ns)
+        if name not in ns:
+            raise CommandError("--row-python-file=%s does not contain:\n  def %s(row):"
+                               % (args.row_pyfile, name))
+        convert = ns[name]
     row_name_tmpl = None
     if args.row_name:
         row_name_tmpl = tempita.Template(
@@ -154,18 +176,25 @@ def reset_database(logger):
     metadata.create_all()
 
 def insert_rows(logger, rows, commit, one_by_one):
-    #import logging
-    #logging.basicConfig()
-    #logging.getLogger('sqlalchemy.engine').setLevel(logging.DEBUG)
+    if not os.environ.get('SUPPRESS_LOGGING'):
+        import logging
+        sl = logging.getLogger('sqlalchemy.engine')
+        formatter = logging.Formatter("%(message)s")
+        ch = logging.StreamHandler(sys.stdout)
+        ch.setLevel(logging.INFO)
+        ch.setFormatter(formatter)
+        sl.addHandler(ch)
+        sl.setLevel(logging.INFO)
+
     from geodns.model import Jurisdiction
     from geodns.config import session
     from geoalchemy import WKTSpatialElement
     to_commit = []
     for row in rows:
         j = Jurisdiction(
-            name=row['name'],
-            uri=row['uri'],
-            type_uri=row['type_uri'],
+            name=unicode(row['name']),
+            uri=unicode(row['uri']),
+            type_uri=unicode(row['type_uri']),
             geom=WKTSpatialElement(row['geom']),
             )
         if not commit:
@@ -231,11 +260,26 @@ def create_geometry_wkt(json_geom):
         coords = ' EMPTY'
     return t + coords
 
+_http_re = re.compile(r'^https?://', re.I)
+
 def get_file_set(logger, filename):
+    if _http_re.search(filename):
+        filename = fetch_url(filename)
     if (os.path.isdir(os.path.basename(filename))
         and os.path.exists(filename+'.shp')):
         logger.debug('Using %r equivalent %r' % (filename, filename+'.shp'))
         filename += '.shp'
+    if os.path.isdir(filename):
+        shps = glob('%s/*.shp' % filename)
+        if len(shps) == 1:
+            filename = shps[0]
+        elif not shps:
+            raise CommandError(
+                'Directory does not contain a .shp file: %s' % filename)
+        else:
+            raise CommandError(
+                'Directory %s contains multiple .shp files: %s' %
+                (filename, ', '.join(shps)))
     if os.path.exists(filename) and filename.endswith('.shp'):
         return FileSet.from_shp(filename)
     if os.path.exists(filename) and filename.endswith('.zip'):
@@ -254,9 +298,24 @@ def get_file_set(logger, filename):
         raise CommandError(
             'Cannot figure out what kind of file %s is' % filename)
 
+def fetch_url(url):
+    import httplib2
+    http = httplib2.Http('~/.http-cache')
+    resp, content = http.request(url)
+    tmp = temp_dir('geodns-importshp-fetch')
+    fn = posixpath.basename(url).split('?')[0].split('#')[0]
+    if not fn:
+        fn = 'file.bin'
+    fn = re.sub(r'[^a-zA-Z0-9.-_]', '', fn)
+    fn = os.path.join(tmp, fn)
+    fp = open(fn, 'wb')
+    fp.write(content)
+    fp.close()
+    return fn
+
 def unpack_zip(filename):
     zip = zipfile.ZipFile(filename, 'r')
-    tmp = temp_dir('geodns-importshp')
+    tmp = temp_dir('geodns-importshp-zip')
     zip.extractall(tmp)
     return tmp
 
