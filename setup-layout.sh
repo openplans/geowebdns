@@ -28,6 +28,10 @@ if [ ! -e src/geodns/.hg ] ; then
     hg clone ssh://hg@bitbucket.org/ianb/geodns src/geodns
 fi
 
+if [ ! -e src/geoalchemy/.hg ] ; then
+    hg clone ssh://hg@bitbucket.org/ianb/geoalchemy src/geoalchemy
+fi
+
 if [ ! -e lib/python/.hg ] ; then
     if [ -e lib/python ] ; then
         rmdir lib/python
@@ -51,3 +55,4 @@ if [ ! -L bin ] ; then
     mv bin.tmp/* bin/
     rmdir bin.tmp
 fi
+
