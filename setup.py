@@ -19,7 +19,11 @@ setup(name='geodns',
           'WebOb',
           'GeoAlchemy',
           'CmdUtils',
-      ],
+          'httplib2',
+          ],
+      tests_require=[
+          'WebTest',
+          ],
       entry_points="""
       [console_scripts]
       geodns-import-shp = geodns.importshp:main
