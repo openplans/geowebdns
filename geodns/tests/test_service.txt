@@ -58,7 +58,28 @@ Query one kind of type::
     INFO - {'GeomFromText_2': 4326, 'GeomFromText_1': 'POINT(-73.9436111 40.7941667)'}
     Response: 200 OK
     Content-Type: application/json
-    {"results": [{"type": "http://open311.org/community-board", "uri": "http://open311.org/community-board/manhattan/11", "name": "Manhattan Community Board #11"}]}
+    {"results": [{"kml_uri": "http://localhost/api1/kml/11", "type": "http://open311.org/community-board", "uri": "http://open311.org/community-board/manhattan/11", "name": "Manhattan Community Board #11"}]}
+
+    >>> print app.get('/api1/kml/11')
+    INFO - SELECT jurisdiction.id, jurisdiction.name, jurisdiction.uri, jurisdiction.type_uri, jurisdiction.updated, jurisdiction.geom 
+    FROM jurisdiction 
+    WHERE jurisdiction.id = %(id_1)s
+    INFO - {'id_1': 11}
+    INFO - BEGIN
+    INFO - SELECT ST_AsKML(%(param_1)s) AS "ST_AsKML_1"
+    INFO - {'param_1': '...'}
+    Response: 200 OK
+    Content-Type: application/vnd.google-earth.kml+xml; charset=UTF-8
+    <?xml version="1.0" encoding="UTF-8"?>
+    <kml xmlns="http://www.opengis.net/kml/2.2">
+      <Document>
+        <Placemark>
+          <name>Manhattan Community Board #11</name>
+          <description>Manhattan Community Board #11: http://open311.org/community-board/manhattan/11</description>
+    <MultiGeometry><Polygon><outerBoundaryIs><LinearRing><coordinates>...</coordinates></LinearRing></outerBoundaryIs></Polygon></MultiGeometry>
+        </Placemark>
+      </Document>
+    </kml>
 
 .. set the interpreter and other emacs stuff:
 
