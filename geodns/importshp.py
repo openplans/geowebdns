@@ -196,6 +196,7 @@ def insert_rows(logger, rows, commit, one_by_one):
             uri=unicode(row['uri']),
             type_uri=unicode(row['type_uri']),
             geom=WKTSpatialElement(row['geom']),
+            properties=row.get('properties'),
             )
         if not commit:
             logger.debug('Adding Jurisdiction %r', j)

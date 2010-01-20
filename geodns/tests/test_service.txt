@@ -31,7 +31,8 @@ First, some setup::
 And a request for a location that has no information::
 
     >>> print app.get('/api1?lat=10&long=10&type=xxx')
-    INFO - SELECT jurisdiction.id, jurisdiction.name, jurisdiction.uri, jurisdiction.type_uri, jurisdiction.updated, jurisdiction.geom 
+    INFO - BEGIN
+    INFO - SELECT jurisdiction.geom AS jurisdiction_geom, jurisdiction.id AS jurisdiction_id, jurisdiction.name AS jurisdiction_name, jurisdiction.uri AS jurisdiction_uri, jurisdiction.type_uri AS jurisdiction_type_uri, jurisdiction.updated AS jurisdiction_updated, jurisdiction.properties_json AS jurisdiction_properties_json 
     FROM jurisdiction 
     WHERE ST_Intersects(jurisdiction.geom, GeomFromText(%(GeomFromText_1)s, %(GeomFromText_2)s))
     INFO - {'GeomFromText_2': 4326, 'GeomFromText_1': 'POINT(10 10)'}
@@ -52,20 +53,19 @@ Now, let's see all the types available::
 Query one kind of type::
 
     >>> print app.get('/api1?lat=40.7941667&long=-73.9436111&type=http://open311.org/community-board')
-    INFO - SELECT jurisdiction.id, jurisdiction.name, jurisdiction.uri, jurisdiction.type_uri, jurisdiction.updated, jurisdiction.geom 
+    INFO - SELECT jurisdiction.geom AS jurisdiction_geom, jurisdiction.id AS jurisdiction_id, jurisdiction.name AS jurisdiction_name, jurisdiction.uri AS jurisdiction_uri, jurisdiction.type_uri AS jurisdiction_type_uri, jurisdiction.updated AS jurisdiction_updated, jurisdiction.properties_json AS jurisdiction_properties_json 
     FROM jurisdiction 
     WHERE ST_Intersects(jurisdiction.geom, GeomFromText(%(GeomFromText_1)s, %(GeomFromText_2)s))
     INFO - {'GeomFromText_2': 4326, 'GeomFromText_1': 'POINT(-73.9436111 40.7941667)'}
     Response: 200 OK
     Content-Type: application/json
-    {"results": [{"kml_uri": "http://localhost/api1/kml/11", "type": "http://open311.org/community-board", "uri": "http://open311.org/community-board/manhattan/11", "name": "Manhattan Community Board #11"}]}
+    {"results": [{"kml_uri": "http://localhost/api1/kml/11", "uri": "http://open311.org/community-board/manhattan/11", "type": "http://open311.org/community-board", "properties": null, "name": "Manhattan Community Board #11"}]}
 
     >>> print app.get('/api1/kml/11')
-    INFO - SELECT jurisdiction.id, jurisdiction.name, jurisdiction.uri, jurisdiction.type_uri, jurisdiction.updated, jurisdiction.geom 
+    INFO - SELECT jurisdiction.id, jurisdiction.name, jurisdiction.uri, jurisdiction.type_uri, jurisdiction.updated, jurisdiction.geom, jurisdiction.properties_json 
     FROM jurisdiction 
     WHERE jurisdiction.id = %(id_1)s
     INFO - {'id_1': 11}
-    INFO - BEGIN
     INFO - SELECT ST_AsKML(%(param_1)s) AS "ST_AsKML_1"
     INFO - {'param_1': '...'}
     Response: 200 OK
