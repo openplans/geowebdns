@@ -69,18 +69,20 @@ class Application(object):
     def query(self, req, coords, type):
         ## FIXME: this is a long-winded way of doing the select:
         point = "POINT(%s %s)" % (coords[1], coords[0])
-        point = WKTSpatialElement(point)
-        s = select([Jurisdiction.__table__], expression.func.ST_Intersects(
-            Jurisdiction.geom, point))
-        conn = engine.connect()
-        s = conn.execute(s, point=point, srid=4326)
+        #point = WKTSpatialElement(point)
+        #s = select([Jurisdiction.__table__], expression.func.ST_Intersects(
+        #    Jurisdiction.geom, point))
+        #conn = engine.connect()
+        #s = conn.execute(s, point=point, srid=4326)
+        s = session.query(Jurisdiction).filter(expression.func.ST_Intersects(Jurisdiction.geom, expression.func.GeomFromText(point, 4326)))
         results = []
         for row in s:
             results.append(dict(
                 type=row.type_uri,
                 name=row.name,
                 uri=row.uri,
-                kml_uri="%s/api1/kml/%s" % (req.application_url, row['id'])))
+                properties=row.properties,
+                kml_uri="%s/api1/kml/%s" % (req.application_url, row.id)))
         return {'results': results}
 
     @wsgify
