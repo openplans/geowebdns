@@ -89,9 +89,25 @@ def temp_dir(name):
     atexit.register(remove)
     return p
 
+def interpolate(args):
+    vars = os.environ.copy()
+    vars.update(dict(
+        file=args.file,
+        file_dir=os.path.dirname(os.path.abspath(args.file)),
+        file_basename=os.path.basename(args.file),
+        file_name=os.path.splitext(os.path.basename(args.file))[0],
+        ))
+    for var in ['row_python', 'row_pyfile']:
+        value = getattr(args, var)
+        if value:
+            value = tempita.Template(value)
+            value = value.substitute(vars)
+            setattr(args, var, value)
+
 @catch_error
 def main(args=None):
     args = parser.parse_args(args)
+    interpolate(args)
     logger =  create_logger(args)
     if args.reset_database:
         reset_database(logger)
