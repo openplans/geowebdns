@@ -6,6 +6,10 @@ import urllib
 
 CACHE_DIR = os.path.join(os.environ['HOME'], '.httplib2-cache')
 
+########################################
+## Community Board stuff:
+########################################
+
 boroughs = {
     1: 'Manhattan',
     2: 'Bronx',
@@ -79,6 +83,196 @@ def import_community_board(row):
             props['contact'] = text
     row['name'] = '%s Community Board #%s' % (borough, b_num)
     row['uri'] = 'http://open311.org/community-board/%s/%s' % (borough.lower(), b_num)
-    row['type_uri'] = 'http://open311.org/community-board'
+    row['type_uri'] = 'http://wiki.open311.org/GeoWeb_DNS/Community_Boards'
     return row
 
+########################################
+## Assembly Districts
+########################################
+
+def import_assembly(row):
+    n = int(row['AssemDist'])
+    row['name'] = 'Assembly District %s' % n
+    row['uri'] = 'http://assembly.state.ny.us/mem/?ad=%s' % n
+    row['type_uri'] = 'http://wiki.open311.org/GeoWeb_DNS/NY_Assembly_District'
+    return row
+
+
+########################################
+## Boroughs
+########################################
+
+# I could link to president offices or something, but eh...
+borough_links = {
+    'Manhattan': 'http://en.wikipedia.org/wiki/Manhattan',
+    'The Bronx': 'http://en.wikipedia.org/wiki/The_Bronx',
+    'Brooklyn': 'http://en.wikipedia.org/wiki/Brooklyn',
+    'Queens': 'http://en.wikipedia.org/wiki/Queens',
+    'Staten Island': 'http://en.wikipedia.org/wiki/Staten_Island',
+    }
+
+def import_borough(row):
+    row['name'] = row['BoroName']
+    row['uri'] = borough_links[row['name']]
+    row['type_uri'] = 'http://wiki.open311.org/GeoWeb_DNS/NYC_Borough'
+    return row
+
+########################################
+## City Council
+########################################
+
+def import_city_council(row):
+    n = int(row['CounDist'])
+    row['uri'] = 'http://council.nyc.gov/d%s/html/members/home.shtml' % n
+    row['name'] = 'New York City Council District %s' % n
+    row['type_uri'] = 'http://wiki.open311.org/GeoWeb_DNS/NYC_City_Council'
+    return row
+
+########################################
+## Congressional District
+########################################
+
+def import_congressional_district(row):
+    n = row['CongDist']
+    row['name'] = 'New York Congressional District %s' % n
+    url = 'http://www.house.gov/house/MemberWWW_by_State.shtml'
+    page = forced_cache_get(url)
+    page = html.fromstring(page, base_url=url)
+    lis = page.cssselect('li')
+    ord_re = re.compile(r'%s(?:st|nd|rd|th)' % n, re.I)
+    for li in lis:
+        if 'New York' not in li.text_content():
+            continue
+        if ord_re.search(li.text_content()):
+            anchors = li.cssselect('a')
+            if not anchors:
+                print 'Weird li: %s' % html.tostring(li)
+            else:
+                row['uri'] = anchors[0].get('href')
+                break
+    else:
+        print 'No uri found for %s district' % n
+    row['type_uri'] = 'http://wiki.open311.org/GeoWeb_DNS/Congressional_District'
+    return row
+
+########################################
+## Educational District
+########################################
+
+def import_election_district(row):
+    n = row['ElectDist']
+    row['name'] = 'New York Election District %s' % n
+    ## FIXME: obviously this is fake; I can't find any useful district information:
+    row['uri'] = 'http://example.com/ny-election-district/%s' % n
+    row['type_uri'] = 'http://wiki.open311.org/GeoWeb_DNS/NYC_Election_Districts'
+    return row
+
+########################################
+## Health Area
+########################################
+
+def import_health_area(row):
+    n = row['HealthArea']
+    row['name'] = 'New York Health Area %s' % n
+    ## FIXME: no URLs found:
+    row['uri'] = 'http://example.com/nyc-health-area/%s' % n
+    row['type_uri'] = 'http://wiki.open311.org/GeoWeb_DNS/NYC_Health_Area'
+    return row
+
+########################################
+## Health Center
+########################################
+
+def import_health_center(row):
+    n = row['HCentDist']
+    row['name'] = 'New York Health Center District %s' % n
+    row['uri'] = 'http://example.com/nyc-health-center/%s' % n
+    row['type_uri'] = 'http://wiki.open311.org/GeoWeb_DNS/NYC_Health_Center'
+    return row
+
+########################################
+## Municipal Court Districts
+########################################
+
+## FIXME: there's a second court in both Manhattan and Brooklyn:
+borough_court_links = {
+    'The Bronx': 'http://www.nycourts.gov/courts/nyc/criminal/generalinfo.shtml#BRONX COUNTY',
+    'Brooklyn': 'http://www.nycourts.gov/courts/nyc/criminal/generalinfo.shtml#KINGS COUNTY',
+    'Manhattan': 'http://www.nycourts.gov/courts/nyc/criminal/generalinfo.shtml#NEW YORK COUNTY',
+    'Queens': 'http://www.nycourts.gov/courts/nyc/criminal/generalinfo.shtml#QUEENS COUNTY',
+    'Staten Island': 'http://www.nycourts.gov/courts/nyc/criminal/generalinfo.shtml#RICHMOND COUNTY',
+    }
+
+def import_municipal_district(row):
+    row['name'] = 'Municipal Court District %s' % row['MuniCourt']
+    row['uri'] = borough_court_links[row['BoroName']]
+    row['type_uri'] = 'http://wiki.open311.org/GeoWeb_DNS/Municipal_Court_District'
+    return row
+
+########################################
+## Police Precinct
+########################################
+
+def import_police_precinct(row):
+    n = row['Precinct']
+    row['uri'] = 'http://www.nyc.gov/html/nypd/html/precincts/precinct_%03i.shtml' % n
+    row['name'] = 'New York City Police Precinct %s' % n
+    row['type_uri'] = 'http://wiki.open311.org/GeoWeb_DNS/Police_Precinct'
+    return row
+
+########################################
+## School District
+########################################
+
+def import_school_district(row):
+    n = row['SchoolDist']
+    row['name'] = 'New York School District %s' % n
+    ## FIXME: I'm sure there's a better link, but I haven't found it:
+    row['uri'] = 'http://example.com/nyc-school-district/%s' % n
+    row['type_uri'] = 'http://wiki.open311.org/GeoWeb_DNS/School_District'
+    return row
+
+########################################
+## State Senate
+########################################
+
+def import_state_senate(row):
+    n = row['StSenDist']
+    row['name'] = 'New York State Senate District %s' % n
+    row['uri'] = 'http://www.nysenate.gov/district/%s' % n
+    row['type_uri'] = 'http://wiki.open311.org/GeoWeb_DNS/State_Senate'
+    return row
+
+########################################
+## Definitions
+########################################
+
+import_routines = {
+    # Assembly Districts:
+    'nyad_09bav': import_assembly,
+    # Boroughs:
+    'nybb_09bav': import_borough,
+    # City Council:
+    'nycc_09bav': import_city_council,
+    # Community Districts:
+    'nycd_09bav': import_community_board,
+    # Congressional District:
+    'nycg_09bav': import_congressional_district,
+    # Election District:
+    'nyed_09bav': import_election_district,
+    # Health Areas:
+    'nyha_09bav': import_health_area,
+    # Health Center District:
+    'nyhc_09bav': import_health_center,
+    # Municipal Court District:
+    'nymc_09bav': import_municipal_district,
+    # Police Precinct:
+    'nypp_09bav': import_police_precinct,
+    # School District:
+    'nysd_09bav': import_school_district,
+    # State Senate:
+    'nyss_09bav': import_state_senate,
+    }
+
+for _name, _func in import_routines.items():
+    globals()['import_file_%s' % _name] = _func
