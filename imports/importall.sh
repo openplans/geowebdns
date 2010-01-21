@@ -1,9 +1,11 @@
 #!/bin/bash
 
 if [ "$1" = "remote" ] ; then
-    CMD="toppcloud run --host=geodns.open311.org"
+    shift
+    CMD="toppcloud run geodns.open311.org geodns-import-shp"
 else
     CMD="../../../bin/geodns-import-shp"
+fi
 
 for F in data/*.zip ; do
     $CMD $F --row-pyfile="geodns.importhooks:import_file_{{file_name}}" "$@" || exit 2

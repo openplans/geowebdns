@@ -3,8 +3,18 @@ import re
 import time
 import os
 import urllib
+import warnings
 
 CACHE_DIR = os.path.join(os.environ['HOME'], '.httplib2-cache')
+if not os.path.exists(CACHE_DIR):
+    try:
+        os.makedirs(CACHE_DIR)
+    except OSError:
+        # No good using $HOME, let's try a temp location:
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            CACHE_DIR = os.tempnam()
+        os.makedirs(CACHE_DIR)
 
 ########################################
 ## Community Board stuff:
