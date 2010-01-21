@@ -30,7 +30,9 @@ $(function () {
     var points = point.split(/\s+/);
     var url = API + '?lat=' + points[0] + '&long=' + points[1];
     $('#type option').each(function () {
-      url += '&type=' + escape(this.value);
+      if (this.selected) {
+        url += '&type=' + escape(this.value);
+      }
     });
     $('#request').text(url);
     $.getJSON(url, function(data) {
@@ -46,6 +48,13 @@ $(function () {
         $('.viewkml', result).attr(
             'href',
             "http://maps.google.com/?q=" + escape(value["kml_uri"]));
+        if (value["properties"]) {
+            var val = $.toJSON(value["properties"]);
+            val = val.replace(/": /g, '": ').replace(/",/g, '", ');
+            $('.properties', result).text(val);
+        } else {
+            $('.properties', result).text('No properties');
+        }
         $('#result').append(result);
       });
     });
