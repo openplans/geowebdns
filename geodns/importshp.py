@@ -13,6 +13,8 @@ import atexit
 import posixpath
 from cmdutils.arg import add_verbose, create_logger
 from cmdutils import CommandError
+from geodns.model import Jurisdiction
+from geodns.config import session
 
 description = """\
 Import .shp files
@@ -24,7 +26,7 @@ parser = argparse.ArgumentParser(
 add_verbose(parser, add_log=True)
 
 parser.add_argument(
-    'file', metavar='FILE',
+    'file', nargs='?', metavar='FILE',
     help="The file to import")
 
 parser.add_argument(
@@ -68,6 +70,12 @@ parser.add_argument(
     '--reset-database', action='store_true',
     help="Drop and re-add all database tables")
 
+parser.add_argument(
+    '--reset-type', metavar='TYPE_URI',
+    action='append',
+    help="Delete all items from the database with the given type "
+    "(can be provided multiple times)")
+
 class catch_error(object):
     def __init__(self, func):
         self.func = func
@@ -91,12 +99,13 @@ def temp_dir(name):
 
 def interpolate(args):
     vars = os.environ.copy()
-    vars.update(dict(
-        file=args.file,
-        file_dir=os.path.dirname(os.path.abspath(args.file)),
-        file_basename=os.path.basename(args.file),
-        file_name=os.path.splitext(os.path.basename(args.file))[0],
-        ))
+    if args.file:
+        vars.update(dict(
+            file=args.file,
+            file_dir=os.path.dirname(os.path.abspath(args.file)),
+            file_basename=os.path.basename(args.file),
+            file_name=os.path.splitext(os.path.basename(args.file))[0],
+            ))
     for var in ['row_python', 'row_pyfile']:
         value = getattr(args, var)
         if value:
@@ -111,6 +120,13 @@ def main(args=None):
     logger =  create_logger(args)
     if args.reset_database:
         reset_database(logger)
+    if args.reset_type:
+        reset_types(logger, args.reset_type)
+    if not args.file:
+        if args.reset_database or args.reset_type:
+            return
+        else:
+            parser.error('You must give a file to import')
     file_set = get_file_set(logger, args.file)
     file_set = file_set.convert_to_standard_projection(logger)
     json = file_set.create_json(logger)
@@ -191,6 +207,18 @@ def reset_database(logger):
     logger.notify('Recreating all tables')
     metadata.create_all()
 
+def reset_types(logger, types):
+    for type in types:
+        q = session.query(Jurisdiction).filter(
+            Jurisdiction.type_uri == unicode(type))
+        count = q.count()
+        if not count:
+            logger.notify('No items with type %s to delete' % type)
+        else:
+            logger.notify('Deleting all (%s) items with type %s' % (count, type))
+            q.delete()
+            session.commit()
+
 def insert_rows(logger, rows, commit, one_by_one):
     if not os.environ.get('SUPPRESS_LOGGING'):
         import logging
@@ -202,8 +230,6 @@ def insert_rows(logger, rows, commit, one_by_one):
         sl.addHandler(ch)
         sl.setLevel(logging.INFO)
 
-    from geodns.model import Jurisdiction
-    from geodns.config import session
     from geoalchemy import WKTSpatialElement
     to_commit = []
     for row in rows:
