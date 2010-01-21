@@ -48,7 +48,7 @@ class Application(object):
     def api1(self, req):
         lat = Decimal(req.GET['lat'])
         long = Decimal(req.GET['long'])
-        result = self.query(req, (lat, long), type=req.GET['type'])
+        result = self.query(req, (lat, long), types=req.GET.getall('type'))
         return Response(
             dumps(result),
             content_type='application/json')
@@ -66,15 +66,22 @@ class Application(object):
             dumps(results),
             content_type='application/json')
     
-    def query(self, req, coords, type):
-        ## FIXME: this is a long-winded way of doing the select:
+    def query(self, req, coords, types):
+        ## FIXME: I keep going back and form on this:
         point = "POINT(%s %s)" % (coords[1], coords[0])
         #point = WKTSpatialElement(point)
         #s = select([Jurisdiction.__table__], expression.func.ST_Intersects(
         #    Jurisdiction.geom, point))
         #conn = engine.connect()
         #s = conn.execute(s, point=point, srid=4326)
-        s = session.query(Jurisdiction).filter(expression.func.ST_Intersects(Jurisdiction.geom, expression.func.GeomFromText(point, 4326)))
+        type_comparisons = []
+        for type in types:
+            type_comparisons.append(
+                Jurisdiction.type_uri == type)
+        s = session.query(Jurisdiction).filter(
+            expression.and_(
+                expression.func.ST_Intersects(Jurisdiction.geom, expression.func.GeomFromText(point, 4326)),
+                expression.or_(*type_comparisons)))
         results = []
         for row in s:
             results.append(dict(
