@@ -12,6 +12,7 @@ from sqlalchemy.sql import expression
 from sqlalchemy.sql import select
 
 def only_get(func):
+    """Decorator to require a GET request and throw an HTTP error if not"""
     def decorated(*args, **kw):
         req = args[-1]
         if req.method != 'GET':
@@ -20,6 +21,7 @@ def only_get(func):
     return decorated
 
 class Application(object):
+    """This object represents the entire application"""
     def __init__(self):
         pass
 
@@ -38,6 +40,8 @@ class Application(object):
 
     @wsgify
     def update_fetch(self, req):
+        """This is called when the application is deployed; it makes
+        sure the tables are created"""
         assert req.environ.get('toppcloud.internal')
         metadata.create_all()
         return Response(
@@ -46,6 +50,7 @@ class Application(object):
     @wsgify
     @only_get
     def api1(self, req):
+        # FIXME: should throw a 400 Bad request as appropriate:
         lat = Decimal(req.GET['lat'])
         long = Decimal(req.GET['long'])
         result = self.query(req, (lat, long), types=req.GET.getall('type'))
@@ -67,8 +72,13 @@ class Application(object):
             content_type='application/json')
     
     def query(self, req, coords, types):
-        ## FIXME: I keep going back and form on this:
+        ## FIXME: This seems crude; it feels like it should also be
+        ## quoted, but is at the moment safe because the coordinates
+        ## are coerced into decimal:
         point = "POINT(%s %s)" % (coords[1], coords[0])
+        ## This is a failed attempt at the query (more GeoAlchmey
+        ## based): (I think the problem is a bug in geoalchemy, with
+        ## points that are constructed outside of the database/engine)
         #point = WKTSpatialElement(point)
         #s = select([Jurisdiction.__table__], expression.func.ST_Intersects(
         #    Jurisdiction.geom, point))

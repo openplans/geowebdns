@@ -1,0 +1,78 @@
+GeoDNS Code Map
+===============
+
+This document describes how GeoDNS works and is laid out.  It's pretty
+simple.
+
+Technologies
+------------
+
+You can look at ``setup.py`` to see requirements, but the basics are:
+
+* `WebOb <http://pythonpaste.org/webob/>`_ is used with `webob.dec
+  <http://pythonpaste.org/webob/modules/dec.html>`_ specifically.
+  There's no "framework" because it's so darn small.
+
+* `GeoAlchemy <http://geoalchemy.org>`_ is used.  I've encountered
+  some bugs, and to work around them I've gone down to SQLAlchemy.
+
+* All of PostGIS.  ogr2ogr is used by the importer.
+
+* The importer uses `httplib2 <http://code.google.com/p/httplib2/>`_
+  and `CmdUtils <http://bitbucket.org/ianb/cmdutils>`_.  No biggy
+  though.
+
+* Tests are done with `doctest
+  <http://docs.python.org/library/doctest.html>`_ and `WebTest
+  <http://pythonpaste.org/webtest/>`_.  These are functional
+  high-level tests (i.e., they run almost-full requests and inspect
+  the output).
+
+* The deployment system is setup with `toppcloud
+  <http://toppcloud.colorstudy.com>`_.  The ``setup-layout.sh`` script
+  actually lays all the repositories out for development.
+
+Code Layout
+-----------
+
+The entire environment can be setup with that ``setup-layout.sh``
+script.  All the code that is GeoDNS-specific is in ``src/geodns/``
+(there's another repository installed in ``lib/python/`` that has all
+the library files).
+
+geodns.config sets up SQLAlchemy, using the toppcloud environmental
+variables.
+
+geodns.model has the SQLAlchemy/GeoAlchemy models.
+
+geodns.wsgiapp has all the web interface.
+
+geodns/static/index.html has the front page; there's no UI in the code
+itself.
+
+The application itself is an object, geodns.wsgiapp.Application; it
+could take configuration, but there is none, so it does not.  The
+routing is manually coded.  It'd be worth abstracting better (maybe
+using Routes), but it's fine for now.
+
+The query goes to api1 for /api1, api1_types for /api1/types, and
+api1_kml for /api1/kml/*.  /api1 does a query, /api1/types returns all
+available types, and /api1/kml/* returns a KML file, as referenced in
+the return value of /api1
+
+Where It Should Go
+------------------
+
+Results (rows in Jurisdiction) should become proper RESTful entities.
+Then updates or deletes could be performed.  A POST to the general
+location would also support adding an item.
+
+More attribution should be added to Jurisdictions, to track who owns
+them, when they uploaded them, what changes there have been, and where
+the source was found (maybe with notes).
+
+Ultimately geodns-import-shp should query this API instead of
+accessing the database directly.
+
+Of course you'll need a system to do authentication to really make
+this work.
