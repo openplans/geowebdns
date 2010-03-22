@@ -9,19 +9,19 @@
 if [ -z "$1" ] || [ "$1" = "-h" ] ; then
     echo "Usage: $(basename $0) DIR"
     echo "Creates a layout for the GeoDNS application in the given directory"
-    echo "toppcloud must be installed before running this"
+    echo "silverlining must be installed before running this"
     exit 2
 fi
 
 DIR="$1"
 
-if ! which toppcloud ; then
-    echo "toppcloud is not installed"
-    echo "(or toppcloud is not on \$PATH)"
+if ! which silver ; then
+    echo "silverlining is not installed"
+    echo "(or silver is not on \$PATH)"
     exit 2
 fi
 
-toppcloud init $DIR
+silver init $DIR
 pushd $DIR
 
 if [ ! -e src/geodns/.hg ] ; then
@@ -41,7 +41,7 @@ fi
 
 if [ ! -L app.ini ] ; then
     rm app.ini
-    ln -s src/geodns/toppcloud-app.ini app.ini
+    ln -s src/geodns/silver-app.ini app.ini
 fi
 
 if [ ! -L static ] ; then
