@@ -25,7 +25,7 @@ silver init $DIR
 pushd $DIR
 
 if [ ! -e src/geodns/.hg ] ; then
-    hg clone ssh://hg@bitbucket.org/ianb/geodns src/geodns
+    hg clone ssh://hg@bitbucket.org/slinkp/geodns src/geodns
 fi
 
 if [ ! -e src/geoalchemy/.hg ] ; then
