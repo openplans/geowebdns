@@ -2,7 +2,7 @@
 
 if [ "$1" = "remote" ] ; then
     shift
-    CMD="toppcloud run geodns.open311.org geodns-import-shp"
+    CMD="silver run geodns.open311.org geodns-import-shp"
 else
     CMD="../../../bin/geodns-import-shp"
 fi

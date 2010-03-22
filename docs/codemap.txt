@@ -28,8 +28,8 @@ You can look at ``setup.py`` to see requirements, but the basics are:
   high-level tests (i.e., they run almost-full requests and inspect
   the output).
 
-* The deployment system is setup with `toppcloud
-  <http://toppcloud.colorstudy.com>`_.  The ``setup-layout.sh`` script
+* The deployment system is setup with `silverlining
+  <http://cloudsilverlining.org>`_.  The ``setup-layout.sh`` script
   actually lays all the repositories out for development.
 
 Code Layout
@@ -40,7 +40,7 @@ script.  All the code that is GeoDNS-specific is in ``src/geodns/``
 (there's another repository installed in ``lib/python/`` that has all
 the library files).
 
-geodns.config sets up SQLAlchemy, using the toppcloud environmental
+geodns.config sets up SQLAlchemy, using the silverlining environmental
 variables.
 
 geodns.model has the SQLAlchemy/GeoAlchemy models.

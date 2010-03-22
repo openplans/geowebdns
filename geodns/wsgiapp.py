@@ -42,7 +42,7 @@ class Application(object):
     def update_fetch(self, req):
         """This is called when the application is deployed; it makes
         sure the tables are created"""
-        assert req.environ.get('toppcloud.internal')
+        assert req.environ.get('silver.internal')
         metadata.create_all()
         return Response(
             'ok', content_type='text/plain')
