@@ -49,10 +49,11 @@ if [ ! -L static ] ; then
     ln -s src/geodns/geodns/static static
 fi
 
-if [ ! -L bin ] ; then
-    mv bin bin.tmp
-    ln -s lib/python/bin bin
-    mv bin.tmp/* bin/
-    rmdir bin.tmp
-fi
+cd bin
+for BINFILE in ../lib/python/bin/*; do
+    if [ ! -e `basename $BINFILE` ]; then
+        ln -s $BINFILE .
+    fi
+done
+cd -
 
