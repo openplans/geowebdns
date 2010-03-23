@@ -56,3 +56,6 @@ if [ ! -L bin ] ; then
     rmdir bin.tmp
 fi
 
+# Console scripts don't work unless we do this
+echo $PWD
+bin/python src/geodns/setup.py develop
