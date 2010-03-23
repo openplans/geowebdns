@@ -36,7 +36,7 @@ if [ ! -e lib/python/.hg ] ; then
     if [ -e lib/python ] ; then
         rmdir lib/python
     fi
-    hg clone ssh://hg@bitbucket.org/ianb/geodns-lib lib/python
+    hg clone ssh://hg@bitbucket.org/slinkp/geodns-lib lib/python
 fi
 
 if [ ! -L app.ini ] ; then
