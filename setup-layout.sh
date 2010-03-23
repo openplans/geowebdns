@@ -1,7 +1,7 @@
 #!/bin/bash
 # How to use this file:
 # First, fetch it, like:
-#     $ wget http://bitbucket.org/ianb/geodns/raw/tip/setup-layout.sh
+#     $ wget http://bitbucket.org/slinkp/geodns/raw/tip/setup-layout.sh
 #     $ chmod +x setup-layout.sh
 #     $ ./setup-layout.sh geodns-app
 
