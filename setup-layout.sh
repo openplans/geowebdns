@@ -56,6 +56,7 @@ if [ ! -L bin ] ; then
     rmdir bin.tmp
 fi
 
-# Console scripts don't work unless we do this
+# Console scripts don't work unless we do this.
+# But this is bad because it might upgrade stuff that we froze in geodns-lib!
 echo $PWD
 bin/python src/geodns/setup.py develop
