@@ -2,5 +2,6 @@ syntax: glob
 
 geodns.egg-info
 imports/data/*.zip
+imports/data/*.ZIP
 *pyc
 

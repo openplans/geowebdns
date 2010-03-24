@@ -19,10 +19,12 @@ for URL in http://www.nyc.gov/html/dcp/download/bytes/nyad_09bav.zip \
     http://www.nyc.gov/html/dcp/download/bytes/nysd_09bav.zip \
     http://www.nyc.gov/html/dcp/download/bytes/nypp_09bav.zip \
     http://www.nyc.gov/html/dcp/download/bytes/nyhc_09bav.zip \
-    http://www.nyc.gov/html/dcp/download/bytes/nyha_09bav.zip ; do
+    http://www.nyc.gov/html/dcp/download/bytes/nyha_09bav.zip \
+    http://dcatlas.dcgis.dc.gov/download/DCBndyPly.ZIP \
+    ; do
     FILE="$(basename $URL)"
     if [ ! -e data/$FILE ] ; then
-        wget $URL -O data/$FILE
+        wget $URL  -O data/$FILE
     else
         echo "$FILE exists"
     fi

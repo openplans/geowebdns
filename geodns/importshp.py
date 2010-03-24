@@ -174,19 +174,31 @@ def main(args=None):
         row['geom'] = create_geometry_wkt(item['geometry'])
         row['type'] = item['type']
         row.update(item['properties'])
-        if convert is not None:
-            row = convert(row)
-            if row is None:
+        if convert is None:
+            converted = [row]
+        else:
+            converted = convert(row)
+            if converted is None:
                 continue
-        if args.type_uri:
-            row.setdefault('type_uri', args.type_uri)
-        if 'name' not in row and row_name_tmpl is not None:
-            row['name'] = row_name_tmpl.substitute(
-                row=row)
-        if 'uri' not in row and row_uri_tmpl is not None:
-            row['uri'] = row_uri_tmpl.substitute(
-                row=row)
-        rows.append(row)
+            if not isinstance(converted, list):
+                # XXX The convert function may actually return
+                # multiple rows! This allows multiple geowebdns types
+                # to be associated with one shapefile. That's a lame
+                # hack around our flat database schema.  Maybe OK for
+                # a demo, but a real app would have a normalized
+                # database.
+                converted = [converted]
+        for row in converted:
+            if args.type_uri:
+                row.setdefault('type_uri', args.type_uri)
+            if 'name' not in row and row_name_tmpl is not None:
+                row['name'] = row_name_tmpl.substitute(
+                    row=row)
+            if 'uri' not in row and row_uri_tmpl is not None:
+                row['uri'] = row_uri_tmpl.substitute(
+                    row=row)
+            rows.append(row)
+
     if args.print_json:
         for index, row in rows:
             print_row(row, index=index)
@@ -323,9 +335,9 @@ def get_file_set(logger, filename):
             raise CommandError(
                 'Directory %s contains multiple .shp files: %s' %
                 (filename, ', '.join(shps)))
-    if os.path.exists(filename) and filename.endswith('.shp'):
+    if os.path.exists(filename) and filename.lower().endswith('.shp'):
         return FileSet.from_shp(filename)
-    if os.path.exists(filename) and filename.endswith('.zip'):
+    if os.path.exists(filename) and filename.lower().endswith('.zip'):
         dir = unpack_zip(filename)
         logger.info('Unpacking %s into %s' % (filename, dir))
         shps = glob(os.path.join(dir, '*/*.shp')) + glob(os.path.join(dir, '*.shp'))
