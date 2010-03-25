@@ -1,4 +1,5 @@
 import cgi
+import os
 import string
 from webob.dec import wsgify
 from webob import exc
@@ -10,6 +11,8 @@ from geodns.config import session, engine
 from geoalchemy import WKTSpatialElement
 from sqlalchemy.sql import expression
 from sqlalchemy.sql import select
+import silversupport.secret
+
 
 def only_get(func):
     """Decorator to require a GET request and throw an HTTP error if not"""
@@ -33,6 +36,8 @@ class Application(object):
             return self.api1_kml(req)
         if req.path_info_peek() == 'api1':
             return self.api1(req)
+        if req.path_info in ('/', '/index.html'):
+            return self.index(req)
         if req.path_info == '/.internal/update_fetch':
             return self.update_fetch(req)
         else:
@@ -71,6 +76,15 @@ class Application(object):
             dumps(results),
             content_type='application/json')
     
+    @wsgify
+    @only_get
+    def index(self, req):
+        template = get_template('index.html')
+        google_key = silversupport.secret.get_key('google.api_key')
+        content = template.substitute(google_api_key=google_key)
+        return Response(content, content_type='text/html')
+
+
     def query(self, req, coords, types):
         ## FIXME: This seems crude; it feels like it should also be
         ## quoted, but is at the moment safe because the coordinates
@@ -120,14 +134,10 @@ class Application(object):
             kml,
             content_type='application/vnd.google-earth.kml+xml')
 
-KML_TEMPLATE = string.Template("""\
-<?xml version="1.0" encoding="UTF-8"?>
-<kml xmlns="http://www.opengis.net/kml/2.2">
-  <Document>
-    <Placemark>
-      <name>${name}</name>
-      <description>${name}: ${uri}</description>
-${polygons}
-    </Placemark>
-  </Document>
-</kml>""")
+TEMPLATES = os.path.join(os.path.dirname(__file__), 'templates')
+
+def get_template(name):
+    source = open(os.path.join(TEMPLATES, name)).read()
+    return string.Template(source)
+
+KML_TEMPLATE = get_template('placemarks.kml')

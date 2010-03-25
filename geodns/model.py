@@ -36,7 +36,9 @@ class Jurisdiction(Base):
         return loads(json)
 
     @properties.setter
-    def set_properties(self, value):
+    def properties(self, value):
+        # Repeating the 'properties' name makes pyflakes unhappy,
+        # but declarative_base seems to require it for some reason.
         if value is None:
             self.properties_json = None
         else:
