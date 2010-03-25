@@ -8,6 +8,7 @@
 #    http://www.nyc.gov/html/dcp/download/bytes/nyfb_09bav.zip
 #    http://www.nyc.gov/html/dcp/download/bytes/nyfd_09bav.zip
 
+mkdir -p data
 for URL in http://www.nyc.gov/html/dcp/download/bytes/nyad_09bav.zip \
     http://www.nyc.gov/html/dcp/download/bytes/nycc_09bav.zip \
     http://www.nyc.gov/html/dcp/download/bytes/nycg_09bav.zip \
