@@ -87,7 +87,7 @@ class Application(object):
         type_comparisons = []
         for type in types:
             type_comparisons.append(
-                Jurisdiction.type_uri == type)
+                Jurisdiction.type_uri == unicode(type))
         s = session.query(Jurisdiction).filter(
             expression.and_(
                 expression.func.ST_Intersects(Jurisdiction.geom, expression.func.GeomFromText(point, 4326)),
