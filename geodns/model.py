@@ -1,7 +1,7 @@
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
 from sqlalchemy import Unicode, DateTime, Column, MetaData, Integer
-from geoalchemy import GeometryColumn, Point, LineString, MultiPolygon
+from geoalchemy import GeometryColumn, MultiPolygon
 from geoalchemy import GeometryDDL
 from geodns.config import engine
 from simplejson import dumps, loads
@@ -36,10 +36,11 @@ class Jurisdiction(Base):
         return loads(json)
 
     @properties.setter
-    def properties(self, value):
+    def set_properties(self, value):
         if value is None:
             self.properties_json = None
         else:
             self.properties_json = unicode(dumps(value))
+
 
 GeometryDDL(Jurisdiction.__table__)
