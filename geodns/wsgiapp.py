@@ -41,6 +41,7 @@ class Application(object):
         if req.path_info == '/.internal/update_fetch':
             return self.update_fetch(req)
         else:
+            print >> req.environ['wsgi.errors'], "404 on path %r" % req.path_info
             raise exc.HTTPNotFound()
 
     @wsgify
@@ -66,12 +67,9 @@ class Application(object):
     @wsgify
     @only_get
     def api1_types(self, req):
-        s = select([Jurisdiction.type_uri], distinct=True)
+        s = select([Jurisdiction.type_uri], distinct=True).order_by(Jurisdiction.type_uri)
         conn = engine.connect()
-        s = conn.execute(s)
-        results = []
-        for row in s:
-            results.append(row.type_uri)
+        results = [row.type_uri for row in conn.execute(s)]
         return Response(
             dumps(results),
             content_type='application/json')
