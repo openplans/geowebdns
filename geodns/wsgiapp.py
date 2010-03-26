@@ -8,7 +8,6 @@ from simplejson import dumps
 from decimal import Decimal
 from geodns.model import Jurisdiction, metadata
 from geodns.config import session, engine
-from geoalchemy import WKTSpatialElement
 from sqlalchemy.sql import expression
 from sqlalchemy.sql import select
 import silversupport.secret
