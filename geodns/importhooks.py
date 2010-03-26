@@ -127,18 +127,32 @@ def import_dc(row):
     rows.append(row)
     return rows
 
-def import_file_sfoutline(row):
-    # San Francisco
-    rows = []
-    row['name'] = 'San Francisco'
-    row['uri'] = 'https://open311.sfgov.org/dev/V1/'
-    row['type_uri'] = type_uris.OPEN311_API
-    rows.append(row)
 
-    row = row.copy()
-    row['uri'] = 'http://www.sfgov.org/'
-    row['type_uri'] = type_uris.GOV_MAIN_SITE
-    rows.append(row)
+class sf_rows(list):
+    precommit_sql = (
+        # We want to merge all the rows for 'San Francisco' into one row
+        # whose geom is the union of all their geoms.
+        "INSERT INTO jurisdiction (name, uri, type_uri, geom) SELECT 'SF_temporary', 'http://www.sfgov.org/', 'http://ns.geowebdns.org/municipality', ST_Union(jr.geom) FROM jurisdiction AS jr WHERE jr.name = 'San Francisco'",
+        # And do it again for the open311 info.
+        "INSERT INTO jurisdiction (name, uri, type_uri, geom) SELECT 'SF_temporary', 'https://open311.sfgov.org/dev/V1/', 'http://ns.geowebdns.org/open311_api', ST_Union(jr.geom) FROM jurisdiction AS jr WHERE jr.name = 'San Francisco'",
+        # Then clean up the original 'San Francisco' rows.
+        "DELETE FROM jurisdiction WHERE name = 'San Francisco'",
+        # And rename our new union rows.
+        "UPDATE jurisdiction SET name = 'San Francisco' WHERE name = 'SF_temporary'",
+        )
+
+def import_file_bayarea_cities(row):
+    # San Francisco
+    rows = sf_rows()
+
+    row['name'] = row['CITY'].title()
+    if row['name'] == 'San Francisco':
+        row['uri'] = 'http://sfgov.org'
+        row['type_uri'] = type_uris.GOV_MAIN_SITE
+        rows.append(row)
+
+        # All other work will be done by rows.precommit_sql...
+    # Ignore other Bay Area cities for now...
     return rows
 
 ########################################
