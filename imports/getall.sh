@@ -22,6 +22,7 @@ for URL in http://www.nyc.gov/html/dcp/download/bytes/nyad_09bav.zip \
     http://www.nyc.gov/html/dcp/download/bytes/nyhc_09bav.zip \
     http://www.nyc.gov/html/dcp/download/bytes/nyha_09bav.zip \
     http://dcatlas.dcgis.dc.gov/download/DCBndyPly.ZIP \
+    http://gispub02.sfgov.org/website/sfshare/catalog/sfoutline.zip \
     ; do
     FILE="$(basename $URL)"
     if [ ! -e data/$FILE ] ; then

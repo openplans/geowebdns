@@ -185,8 +185,8 @@ def main(args=None):
                 # multiple rows! This allows multiple geowebdns types
                 # to be associated with one shapefile. That's a lame
                 # hack around our flat database schema.  Maybe OK for
-                # a demo, but a real app would have a normalized
-                # database.
+                # a demo, but VERY wasteful of space in the DB.
+                # A real app would have a somewhat normalized DB.
                 converted = [converted]
         for row in converted:
             if args.type_uri:
@@ -200,7 +200,7 @@ def main(args=None):
             rows.append(row)
 
     if args.print_json:
-        for index, row in rows:
+        for index, row in enumerate(rows):
             print_row(row, index=index)
         return
     if args.print_json_row:

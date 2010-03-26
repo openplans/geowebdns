@@ -114,6 +114,7 @@ def import_assembly(row):
 ## Cities
 ########################################
 def import_dc(row):
+    # Washington, DC
     rows = []
     row['name'] = 'Washington, DC'
     row['uri'] = row['WEB_URL']
@@ -123,6 +124,20 @@ def import_dc(row):
     row = row.copy()
     row['uri'] = 'http://api.dc.gov/open311/v2/'
     row['type_uri'] = type_uris.OPEN311_API
+    rows.append(row)
+    return rows
+
+def import_file_sfoutline(row):
+    # San Francisco
+    rows = []
+    row['name'] = 'San Francisco'
+    row['uri'] = 'https://open311.sfgov.org/dev/V1/'
+    row['type_uri'] = type_uris.OPEN311_API
+    rows.append(row)
+
+    row = row.copy()
+    row['uri'] = 'http://www.sfgov.org/'
+    row['type_uri'] = type_uris.GOV_MAIN_SITE
     rows.append(row)
     return rows
 
