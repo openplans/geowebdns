@@ -41,7 +41,6 @@ class Application(object):
         if req.path_info == '/.internal/update_fetch':
             return self.update_fetch(req)
         else:
-            print >> req.environ['wsgi.errors'], "404 on path %r" % req.path_info
             raise exc.HTTPNotFound()
 
     @wsgify
