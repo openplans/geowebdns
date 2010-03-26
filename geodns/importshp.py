@@ -169,6 +169,8 @@ def main(args=None):
         row_uri_tmpl = tempita.Template(
             args.row_uri,
             name='--row-uri')
+
+    precommit_sql_list = []
     for item in json:
         row = {}
         row['geom'] = create_geometry_wkt(item['geometry'])
@@ -188,6 +190,15 @@ def main(args=None):
                 # a demo, but VERY wasteful of space in the DB.
                 # A real app would have a somewhat normalized DB.
                 converted = [converted]
+
+            if hasattr(converted, 'precommit_sql'):
+                # Hacky hook for convert functions to pass back
+                # some SQL to run after all rows have inserted.
+                # XXX should probably just change the
+                # convert function API?
+                if converted.precommit_sql not in precommit_sql_list:
+                    precommit_sql_list.append(converted.precommit_sql)
+
         for row in converted:
             if args.type_uri:
                 row.setdefault('type_uri', args.type_uri)
@@ -210,7 +221,7 @@ def main(args=None):
             print 'No rows'
         return
     insert_rows(logger, rows, commit=args.commit,
-                one_by_one=args.row_by_row)
+                one_by_one=args.row_by_row, precommit_sql=precommit_sql_list)
 
 def reset_database(logger):
     from geodns.model import metadata
@@ -231,7 +242,7 @@ def reset_types(logger, types):
             q.delete()
             session.commit()
 
-def insert_rows(logger, rows, commit, one_by_one):
+def insert_rows(logger, rows, commit, one_by_one, precommit_sql):
     if not os.environ.get('SUPPRESS_LOGGING'):
         import logging
         sl = logging.getLogger('sqlalchemy.engine')
@@ -263,8 +274,23 @@ def insert_rows(logger, rows, commit, one_by_one):
             else:
                 logger.debug('Deferring Jurisdiction %r', j)
                 to_commit.append(j)
+
+
+    # Need to add everything and force a flush here so the pre-commit
+    # raw SQL expressions run in the right context.
     if to_commit and commit:
         session.add_all(to_commit)
+    session.flush()
+
+    from sqlalchemy.sql import text
+    for sql_expressions in precommit_sql:
+        if isinstance(sql_expressions, basestring):
+            sql_expressions = [sql_expressions]
+        for sql in sql_expressions:
+            logger.notify("Running pre-commit sql expression: %r" % sql)
+            session.connection().execute(text(sql))
+
+    if to_commit and commit:
         logger.notify('COMMIT')
         session.commit()
     elif not commit:
