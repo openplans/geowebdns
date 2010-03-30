@@ -1,4 +1,4 @@
-qWe'll look at the SQLAlchemy output, but not with the default format::
+We'll look at the SQLAlchemy output, but not with the default format::
 
     >>> import logging, sys
     >>> logger = logging.getLogger('sqlalchemy')
@@ -11,20 +11,20 @@ qWe'll look at the SQLAlchemy output, but not with the default format::
 
 First, import some data::
 
-    >>> from geodns import importshp
+    >>> from geowebdns import importshp
     >>> import os
     >>> os.environ['SUPPRESS_LOGGING'] = '1'
     >>> importshp.main.func(
     ...     [os.path.join(os.path.dirname(importshp.__file__), 'tests/nycd_09b_av/'),
     ...     '--reset-database', '--commit',
-    ...     '--row-pyfile=geodns.importhooks:import_community_board']) #doctest: +ELLIPSIS
+    ...     '--row-pyfile=geowebdns.importhooks:import_community_board']) #doctest: +ELLIPSIS
     Dropping all tables
     ...
     COMMIT
 
 First, some setup::
 
-    >>> from geodns.wsgiapp import Application
+    >>> from geowebdns.wsgiapp import Application
     >>> from webtest import TestApp
     >>> app = TestApp(Application())
 
@@ -67,6 +67,5 @@ Query one kind of type::
 
      Local Variables:
      mode: doctest
-     doctest-python-command: "/home/ianb/src/geodns-app/bin/python"
      doctest-optionflags: ("ELLIPSIS")
      End:

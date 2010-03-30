@@ -1,7 +1,7 @@
-GeoDNS Code Map
+GeoWebDNS Code Map
 ===============
 
-This document describes how GeoDNS works and is laid out.  It's pretty
+This document describes how GeoWebDNS works and is laid out.  It's pretty
 simple.
 
 Technologies
@@ -36,21 +36,21 @@ Code Layout
 -----------
 
 The entire environment can be setup with that ``setup-layout.sh``
-script.  All the code that is GeoDNS-specific is in ``src/geodns/``
+script.  All the code that is GeoWebDNS-specific is in ``src/geowebdns/``
 (there's another repository installed in ``lib/python/`` that has all
 the library files).
 
-geodns.config sets up SQLAlchemy, using the silverlining environmental
+geowebdns.config sets up SQLAlchemy, using the silverlining environmental
 variables.
 
-geodns.model has the SQLAlchemy/GeoAlchemy models.
+geowebdns.model has the SQLAlchemy/GeoAlchemy models.
 
-geodns.wsgiapp has all the web interface.
+geowebdns.wsgiapp has all the web interface.
 
-geodns/static/index.html has the front page; there's no UI in the code
+geowebdns/static/index.html has the front page; there's no UI in the code
 itself.
 
-The application itself is an object, geodns.wsgiapp.Application; it
+The application itself is an object, geowebdns.wsgiapp.Application; it
 could take configuration, but there is none, so it does not.  The
 routing is manually coded.  It'd be worth abstracting better (maybe
 using Routes), but it's fine for now.
@@ -71,7 +71,7 @@ More attribution should be added to Jurisdictions, to track who owns
 them, when they uploaded them, what changes there have been, and where
 the source was found (maybe with notes).
 
-Ultimately geodns-import-shp should query this API instead of
+Ultimately geowebdns-import-shp should query this API instead of
 accessing the database directly.
 
 Of course you'll need a system to do authentication to really make

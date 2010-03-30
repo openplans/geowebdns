@@ -13,8 +13,8 @@ import atexit
 import posixpath
 from cmdutils.arg import add_verbose, create_logger
 from cmdutils import CommandError
-from geodns.model import Jurisdiction
-from geodns.config import session
+from geowebdns.model import Jurisdiction
+from geowebdns.config import session
 
 description = """\
 Import .shp files
@@ -224,7 +224,7 @@ def main(args=None):
                 one_by_one=args.row_by_row, precommit_sql=precommit_sql_list)
 
 def reset_database(logger):
-    from geodns.model import metadata
+    from geowebdns.model import metadata
     logger.notify('Dropping all tables')
     metadata.drop_all()
     logger.notify('Recreating all tables')
@@ -383,7 +383,7 @@ def fetch_url(url):
     import httplib2
     http = httplib2.Http('~/.http-cache')
     resp, content = http.request(url)
-    tmp = temp_dir('geodns-importshp-fetch')
+    tmp = temp_dir('geowebdns-importshp-fetch')
     fn = posixpath.basename(url).split('?')[0].split('#')[0]
     if not fn:
         fn = 'file.bin'
@@ -396,7 +396,7 @@ def fetch_url(url):
 
 def unpack_zip(filename):
     zip = zipfile.ZipFile(filename, 'r')
-    tmp = temp_dir('geodns-importshp-zip')
+    tmp = temp_dir('geowebdns-importshp-zip')
     zip.extractall(tmp)
     return tmp
 
@@ -418,7 +418,7 @@ class FileSet(object):
             shx=base+'.shx')
 
     def new(self):
-        new_dir = temp_dir('geodns-new-import')
+        new_dir = temp_dir('geowebdns-new-import')
         return self.__class__(
             shp=os.path.join(new_dir, self.name+'.shp'),
             dbf=os.path.join(new_dir, self.name+'.dbf'),
@@ -438,7 +438,7 @@ class FileSet(object):
         return new_file_set
 
     def create_json(self, logger):
-        fid, tmp = tempfile.mkstemp(prefix='geodns-convert-json', suffix='.json')
+        fid, tmp = tempfile.mkstemp(prefix='geowebdns-convert-json', suffix='.json')
         os.close(fid)
         # Hrm, ogr2ogr won't get me write to this without deleting first:
         os.unlink(tmp)

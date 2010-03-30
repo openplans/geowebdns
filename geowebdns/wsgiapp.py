@@ -6,8 +6,8 @@ from webob import exc
 from webob import Response
 from simplejson import dumps
 from decimal import Decimal
-from geodns.model import Jurisdiction, metadata
-from geodns.config import session, engine
+from geowebdns.model import Jurisdiction, metadata
+from geowebdns.config import session, engine
 from sqlalchemy.sql import expression
 from sqlalchemy.sql import select
 import silversupport.secret

@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = '0.1'
+version = '0.2dev'
 
 setup(name='geowebdns',
       version=version,
@@ -26,6 +26,6 @@ setup(name='geowebdns',
           ],
       entry_points="""
       [console_scripts]
-      geodns-import-shp = geowebdns.importshp:main
+      geowebdns-import-shp = geowebdns.importshp:main
       """,
       )

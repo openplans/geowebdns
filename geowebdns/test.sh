@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DBNAME=test_geodns
+DBNAME=test_geowebdns
 echo Dropping $DBNAME, if it exists...
 dropdb $DBNAME 2>/dev/null
 echo Creating $DBNAME ....

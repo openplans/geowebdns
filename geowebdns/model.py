@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy import Unicode, DateTime, Column, MetaData, Integer
 from geoalchemy import GeometryColumn, MultiPolygon
 from geoalchemy import GeometryDDL
-from geodns.config import engine
+from geowebdns.config import engine
 from simplejson import dumps, loads
 
 metadata = MetaData(engine)

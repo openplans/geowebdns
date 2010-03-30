@@ -1,9 +1,9 @@
 #!/bin/bash
 # How to use this file:
 # First, fetch it, like:
-#     $ wget http://bitbucket.org/slinkp/geodns/raw/tip/setup-layout.sh
+#     $ wget http://bitbucket.org/slinkp/geowebdns/raw/tip/setup-layout.sh
 #     $ chmod +x setup-layout.sh
-#     $ ./setup-layout.sh geodns-app
+#     $ ./setup-layout.sh geowebdns-app
 
 
 if [ -z "$1" ] || [ "$1" = "-h" ] ; then
@@ -24,8 +24,8 @@ fi
 silver init $DIR
 pushd $DIR
 
-if [ ! -e src/geodns/.hg ] ; then
-    hg clone ssh://hg@bitbucket.org/slinkp/geodns src/geodns
+if [ ! -e src/geowebdns/.hg ] ; then
+    hg clone ssh://hg@bitbucket.org/slinkp/geowebdns src/geowebdns
 fi
 
 if [ ! -e src/geoalchemy/.hg ] ; then
@@ -36,17 +36,17 @@ if [ ! -e lib/python/.hg ] ; then
     if [ -e lib/python ] ; then
         rmdir lib/python
     fi
-    hg clone ssh://hg@bitbucket.org/slinkp/geodns-lib lib/python
+    hg clone ssh://hg@bitbucket.org/slinkp/geowebdns-lib lib/python
 fi
 
 if [ ! -L app.ini ] ; then
     rm app.ini
-    ln -s src/geodns/silver-app.ini app.ini
+    ln -s src/geowebdns/silver-app.ini app.ini
 fi
 
 if [ ! -L static ] ; then
     rmdir static
-    ln -s src/geodns/geodns/static static
+    ln -s src/geowebdns/geowebdns/static static
 fi
 
 cd bin
