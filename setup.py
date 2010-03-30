@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 version = '0.1'
 
-setup(name='geodns',
+setup(name='geowebdns',
       version=version,
       description="Geographic query web service",
       long_description="""\
@@ -26,6 +26,6 @@ setup(name='geodns',
           ],
       entry_points="""
       [console_scripts]
-      geodns-import-shp = geodns.importshp:main
+      geodns-import-shp = geowebdns.importshp:main
       """,
       )
