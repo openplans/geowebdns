@@ -8,6 +8,7 @@
 #    http://www.nyc.gov/html/dcp/download/bytes/nyfb_09bav.zip
 #    http://www.nyc.gov/html/dcp/download/bytes/nyfd_09bav.zip
 
+HAD_FAILURES=0
 mkdir -p data
 for URL in http://www.nyc.gov/html/dcp/download/bytes/nyad_09bav.zip \
     http://www.nyc.gov/html/dcp/download/bytes/nycc_09bav.zip \
@@ -26,9 +27,20 @@ for URL in http://www.nyc.gov/html/dcp/download/bytes/nyad_09bav.zip \
     ; do
     FILE="$(basename $URL)"
     if [ ! -e data/$FILE ] ; then
-        wget $URL  -O data/$FILE
+        curl --silent -f $URL  > data/$FILE
+	if [ "$?" != "0" ]; then
+	    echo failed to download $URL
+	    rm -f data/$FILE
+	    HAD_FAILURES=1
+	fi
     else
         echo "$FILE exists"
     fi
 done
-echo "Everything fetched."
+
+if [ "$HAD_FAILURES" == "0" ]; then
+    echo "Everything fetched."
+else
+    echo "Not everything fetched."
+    exit 1
+fi
