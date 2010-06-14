@@ -306,29 +306,29 @@ def import_state_senate(row):
 
 import_routines = {
     # Assembly Districts:
-    'nyad_09bav': import_assembly,
+    'nyad_10aav': import_assembly,
     # Boroughs:
-    'nybb_09bav': import_borough,
+    'nybb_10aav': import_borough,
     # City Council:
-    'nycc_09bav': import_city_council,
+    'nycc_10aav': import_city_council,
     # Community Districts:
-    'nycd_09bav': import_community_board,
+    'nycd_10aav': import_community_board,
     # Congressional District:
-    'nycg_09bav': import_congressional_district,
+    'nycg_10aav': import_congressional_district,
     # Election District:
-    'nyed_09bav': import_election_district,
+    'nyed_10aav': import_election_district,
     # Health Areas:
-    'nyha_09bav': import_health_area,
+    'nyha_10aav': import_health_area,
     # Health Center District:
-    'nyhc_09bav': import_health_center,
+    'nyhc_10aav': import_health_center,
     # Municipal Court District:
-    'nymc_09bav': import_municipal_district,
+    'nymc_10aav': import_municipal_district,
     # Police Precinct:
-    'nypp_09bav': import_police_precinct,
+    'nypp_10aav': import_police_precinct,
     # School District:
-    'nysd_09bav': import_school_district,
+    'nysd_10aav': import_school_district,
     # State Senate:
-    'nyss_09bav': import_state_senate,
+    'nyss_10aav': import_state_senate,
 
     # Cities:
     'DCBndyPly': import_dc,
