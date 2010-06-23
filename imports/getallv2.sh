@@ -33,14 +33,6 @@ function download {
 }
 
 
-# Skipping these for now, what would census tracts link to?:
-#    http://www.nyc.gov/html/dcp/download/bytes/nyct2000_09bav.zip
-#    http://www.nyc.gov/html/dcp/download/bytes/nycb2000_09bav.zip
-# Skipping these fire companies too:
-#    http://www.nyc.gov/html/dcp/download/bytes/nyfc_09bav.zip
-#    http://www.nyc.gov/html/dcp/download/bytes/nyfb_09bav.zip
-#    http://www.nyc.gov/html/dcp/download/bytes/nyfd_09bav.zip
-
 # TODO: these NYC data URIs are not permanent, it changes
 # every few months when they release new files. They
 # apparently don't preserve the old URIs!
@@ -63,6 +55,14 @@ done
 # Should the files change, hopefully only the suffix will need to change.  If
 # you want to add new sources, add their two-letter code to the for loop.
 
+# Skipping these for now, what would census tracts link to?:
+#    http://www.nyc.gov/html/dcp/download/bytes/nyct2000_09bav.zip
+#    http://www.nyc.gov/html/dcp/download/bytes/nycb2000_09bav.zip
+# Skipping these fire companies too:
+#    http://www.nyc.gov/html/dcp/download/bytes/nyfc_09bav.zip
+#    http://www.nyc.gov/html/dcp/download/bytes/nyfb_09bav.zip
+#    http://www.nyc.gov/html/dcp/download/bytes/nyfd_09bav.zip
+
 # NOTE: The name $SHORTURL is used to avoid download clobbering $URL.
 SHORTURL=http://www.nyc.gov/html/dcp/download/bytes/
 PREFIX=ny
@@ -71,8 +71,8 @@ for NAME in ad cc cg ss ed mc bb cd sd pp hc ha; do
     # rebuild the filename
     FILE=$PREFIX$NAME$SUFFIX
     # (ie nyad_10aav.zip)
-    FULLURL=$SHORTURL$FILE
-    download $FILE $FULLURL
+    URL=$SHORTURL$FILE
+    download $FILE $URL
 done
 
 # The third section is similar to the second, but also needs to send extra data
@@ -89,10 +89,9 @@ for FILE in \
     ; do
     # Chop $FILE into $1 and $2, breaking on spaces.
     set -- $FILE
-    DSID=$1
-    FILE=$2
-    POST="DSID=$DSID&file=$FILE"
-    download $FILE $SHORTURL $POST
+    POST="DSID=$1&file=$2"
+    URL=$SHORTURL?$POST
+    download $FILE $URL
 done
 
 # Another source for multiple files.  This one is again similar toy the
@@ -158,8 +157,8 @@ for STATE in \
         ; do
         FILE=$PREFIX$STATENUM$FILE # The whole drawn out filename
                                         # (ie tl_2009_36_cousub.zip)
-        FULLURL=$SHORTURL/$STATE/$FILE
-        download $FILE $FULLURL
+        URL=$SHORTURL/$STATE/$FILE
+        download $FILE $URL
     done
 done
 
