@@ -1,7 +1,8 @@
 #!/bin/bash
 # How to use this file:
 # First, fetch it, like:
-#     $ wget http://bitbucket.org/slinkp/geowebdns/raw/tip/setup-layout.sh
+#     $ wget https://github.com/openplans/geowebdns
+#     $ cd geowebdns
 #     $ chmod +x setup-layout.sh
 #     $ ./setup-layout.sh geowebdns-app
 
@@ -24,8 +25,8 @@ fi
 silver init $DIR
 pushd $DIR
 
-if [ ! -e src/geowebdns/.hg ] ; then
-    hg clone ssh://hg@bitbucket.org/slinkp/geowebdns src/geowebdns
+if [ ! -e src/geowebdns/.git ] ; then
+    git clone git@github.com:openplans/geowebdns.git src/geowebdns
 fi
 
 if [ ! -e src/geoalchemy/.hg ] ; then
@@ -36,7 +37,7 @@ if [ ! -e lib/python/.hg ] ; then
     if [ -e lib/python ] ; then
         rmdir lib/python
     fi
-    hg clone ssh://hg@bitbucket.org/slinkp/geodns-lib lib/python
+    git clone git@github.com:openplans/geowebdns-lib.git lib/python
 fi
 
 if [ ! -L app.ini ] ; then
